@@ -9,11 +9,11 @@ MCU = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 # Project
 TARGET    = main
 BUILD_DIR = build
-LDSCRIPT  = STM32F407VGTX_FLASH.ld
+LDSCRIPT  = startup/STM32F407VGTX_FLASH.ld
 
 # Sources
-C_SRCS  = main.c
-AS_SRCS = startup_stm32f407xx.s
+C_SRCS  = src/main.c cmsis/system_stm32f4xx.c
+AS_SRCS = startup/startup_stm32f407xx.s
 
 # Object files
 C_OBJS  = $(addprefix $(BUILD_DIR)/, $(C_SRCS:.c=.o))
@@ -22,7 +22,7 @@ OBJS    = $(C_OBJS) $(AS_OBJS)
 
 # Compiler flags
 CFLAGS  = $(MCU) -Wall -Wextra -Werror -g -O0
-CFLAGS += -ffreestanding
+CFLAGS += -ffreestanding -Icmsis -DSTM32F407xx -MMD -MP
 
 # Linker flags
 LDFLAGS   = $(MCU) -T $(LDSCRIPT) -nostdlib
@@ -59,3 +59,5 @@ clean:
 
 flash: $(BUILD_DIR)/$(TARGET).bin
 	st-flash write $< 0x08000000
+
+-include $(OBJS:.o=.d)
